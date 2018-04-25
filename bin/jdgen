@@ -1,0 +1,10 @@
+#!/bin/bash
+# this script is shared between multiple scripts in this directory that soft-link back to this one
+
+ME="`basename "$0"`"
+PROJ_ROOT="`dirname "$0"`/.."
+LIBS="$PROJ_ROOT/build/libs"
+CMDLINE="$PROJ_ROOT/build/classes/java/main/cmdline"
+JAR="$LIBS/`ls "$LIBS" | tail -n 1`"
+
+java -cp "$CMDLINE:$JAR:$CLASSPATH" cmdline.$ME "$@"

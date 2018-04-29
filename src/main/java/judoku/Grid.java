@@ -35,11 +35,7 @@ public class Grid {
 	}
 
 	public Grid(int size) {
-		int root = 1;
-		for (; root * root < size; ++root)
-			if (size == root * root)
-				break;
-
+		int root = (int) Math.round(Math.sqrt((double) size));
 		if (root * root != size)
 			throw new IllegalArgumentException("size=" + size);
 
@@ -110,21 +106,25 @@ public class Grid {
 		return cells[toNth(col, row) - 1];
 	}
 
-	public void setCell(int nth /*1..numCells()*/, int value) { cells[nth - 1] = value; }
-	public void setCell(int col, int row, int value) {
-		checkBounds(col, row);
-
-		if (value != EMPTY && (value < 1 || value > size))
-			throw new IllegalArgumentException("Illegal cell value " + value);
-
-		cells[toNth(col, row) - 1] = value;
-	}
-
 	public boolean isEmpty(int nth /*1..numCells()*/) { return getCell(nth) == EMPTY; }
 	public boolean isEmpty(int col, int row) { return getCell(col, row) == EMPTY; }
 
-	public void setEmpty(int nth /*1..numCells()*/) { setCell(nth, EMPTY); }
-	public void setEmpty(int col, int row) { setCell(col, row, EMPTY); }
+	public Grid withCell(int nth /*1..numCells()*/, int value) {
+		if (value != EMPTY && (value < 1 || value > size))
+			throw new IllegalArgumentException("Illegal cell value: " + value);
+
+		Grid derived = new Grid(this);
+		derived.cells[nth - 1] = value;
+		return derived;
+	}
+
+	public Grid withCell(int col, int row, int value) {
+		checkBounds(col, row);
+		return withCell(toNth(col, row), value);
+	}
+
+	public Grid withCellEmpty(int nth /*1..numCells()*/) { return withCell(nth, EMPTY); }
+	public Grid withCellEmpty(int col, int row) { return withCell(col, row, EMPTY); }
 
 	public int[] getCandidates(int nth /*1..numCells()*/) {
 		return getCandidates(toColumn(nth), toRow(nth));

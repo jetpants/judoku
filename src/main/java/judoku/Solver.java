@@ -24,19 +24,19 @@ public class Solver {
         if (!puzzle.isLegal())
             throw new IllegalArgumentException("Grid has invalid state and no solutions");
 
-        this.puzzle = new Grid(puzzle);
+        this.puzzle = puzzle;
     }
 
     public Grid[] findSolutions(int maxSolutions) {
 		AbstractList<Grid> solutions = new ArrayList<Grid>(maxSolutions);
-		int n = search(new Grid(puzzle), solutions, maxSolutions);
+		int n = search(puzzle, solutions, maxSolutions);
 		assert n == solutions.size() : n;
 		Grid[] results = new Grid[n];
 		return solutions.toArray(results);
 	}
 
     public int countSolutions(int maxSolutions) {
-		return search(new Grid(puzzle), null, maxSolutions);
+		return search(puzzle, null, maxSolutions);
 	}
 
     public boolean isProper() {
@@ -57,11 +57,8 @@ public class Solver {
         for (int nth = 1; nth <= puzzle.numCells() && minimal; ++nth) {
             int val = puzzle.getCell(nth);
 
-            if (val != Grid.EMPTY) {
-                puzzle.setEmpty(nth);
-                minimal = countSolutions(2) > 1;
-                puzzle.setCell(nth, val);
-            }
+            if (val != Grid.EMPTY)
+                minimal = countSolutions(puzzle.withCellEmpty(nth), 2) > 1;
         }
 
         return minimal;
@@ -114,7 +111,7 @@ public class Solver {
 			// no more empty cells - a complete solution has been found :)
 			if (solutions != null) {
 				assert template.isLegal();
-				solutions.add(new Grid(template));
+				solutions.add(template);
 			}
 			return 1;
 		}
@@ -125,10 +122,9 @@ public class Solver {
         int found = 0;
 
 		for (int value: values) {
-			template.setCell(col, row, value);
-			found += bruteForce(template, solutions, max - found);
+            Grid candidate = template.withCell(col, row, value);
+			found += bruteForce(candidate, solutions, max - found);
 		}
-		template.setCell(col, row, Grid.EMPTY);
 
 		return found;
 	}

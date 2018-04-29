@@ -21,7 +21,7 @@ import judoku.Grid;
 
 public class Generator {
 	public Generator(Grid prototype) {
-		this.prototype = new Grid(prototype);
+		this.prototype = prototype;
 
 		if (!prototype.isLegal())
             throw new IllegalArgumentException("Prototype has illegal values no solutions");
@@ -112,14 +112,14 @@ public class Generator {
 		/*	generate indices into the grid's cells and shuffle their order. The cells of the
 		  	grid will be traversed in this order looking for givens that can be removed.
 		  	Traversing them in this random order means that the generated puzzles will have
-			randomly placed spaces and aren't "top (or bottom) heavy" */
+			randomly placed spaces and aren't "top heavy" */
 
 		int[] remap = new int[out.numCells()];
 		for (int i = 0; i < remap.length; ++i) remap[i] = i + 1;	// 1..numCells()
 		Util.shuffle(remap);
 
 		/*	start out with a complete solution with all cells filled and iteratively test
-			which cells may be emptied while keeping the puzzle to only one solution */
+			which pairs of cells may be emptied while keeping the puzzle to only one solution */
 
 		for (int i = 0; i < remap.length; ++i) {
 			// the two nth candidate cells to be emptied
@@ -129,21 +129,12 @@ public class Generator {
 			//  if a maps to b then b maps to a. Only need to process each pair once
 			if (a > b) continue;
 
-			// a may equal b, so do both gets before the two sets
-			int aVal = out.getCell(a);
-			int bVal = out.getCell(b);
+			Grid trial = out.withCellEmpty(a).withCellEmpty(b);
+			boolean uniqueSolution = Solver.countSolutions(trial, 2) == 1;
 
-			out.setEmpty(a);
-			out.setEmpty(b);
-
-			boolean uniqueSolution = Solver.countSolutions(out, 2) == 1;
-
-			/*	if removing that pair of cells meant there was no longer a unique solution,
-				put them back (and try a different pair) */
-			if (!uniqueSolution) {
-				out.setCell(a, aVal);
-				out.setCell(b, bVal);
-			}
+			/*	if there's still a unique solution having removed that pair of cells, proceed
+			 	with the modified grid as the base (and try other pairs too) */
+			if (uniqueSolution) out = trial;
 		}
 
 		return out;

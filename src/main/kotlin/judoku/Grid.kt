@@ -26,7 +26,7 @@ import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonElement
 import com.google.gson.JsonParseException
 
-public class Grid {
+class Grid {
 	/*	terminology below adopted from 'List of Sudoku terms and jargon'
 		http://en.wikipedia.org/wiki/List_of_Sudoku_terms_and_jargon
 		More terminology here:
@@ -111,6 +111,7 @@ public class Grid {
 		require(value == EMPTY || (value in 1..size)) { "Cell value not in range 1-$size: $value" }
 		val new = Grid(this)
 		new.cells[nth - 1] = value
+		assert(new.isLegal())
 		return new
 	}
 
@@ -119,6 +120,7 @@ public class Grid {
 		require(value == EMPTY || (value in 1..size)) { "Cell value not in range 1-$size: $value" }
 		val new = Grid(this)
 		new.cells[toNth(col, row) - 1] = value
+		assert(new.isLegal())
 		return new
 	}
 
@@ -130,21 +132,11 @@ public class Grid {
 		require(row in 1..size) { "Row not in range 1-$size: $row" }
 	}
 
-	fun isLegal(): Boolean {
-		/*	Check there are no illegal cell values (i.e., ones outside of the range 1..size).
-		  	Internally, cell values are used as array indices so its vital that illegal values
-		  	are rejected by setCell(). Also a good idea to confirm using this method  after a
-		  	grid has been imported from JSON and could potentially contain any weird values. */
-
-		cells.forEach { if (it != EMPTY && (it < 1 || it > size)) return false }
-		return true
+	fun getPossibilities(nth: Int /*1..numCells()*/): IntArray {
+		return getPossibilities(toColumn(nth), toRow(nth))
 	}
 
-	fun getCandidates(nth: Int /*1..numCells()*/): IntArray {
-		return getCandidates(toColumn(nth), toRow(nth))
-	}
-
-	fun getCandidates(col: Int, row: Int): IntArray {
+	fun getPossibilities(col: Int, row: Int): IntArray {
 		requireBoundsCheck(col, row)
 
 		val seen = BooleanArray(1 + size)		// EMPTY + 1..size
@@ -187,7 +179,29 @@ public class Grid {
 		return results
 	}
 
+	internal fun isLegal(): Boolean {
+		/*	Should always return true; it shouldn't be possible through the public interface to
+			construct a grid with illegal values. This method confirms that there are no illegal
+			cell values (i.e., ones outside of the range 1..size). Internally, cell values are
+			used as array indices so it's vital that illegal values are rejected when setting
+			cell values and when grids are imported from JSON. */
+
+		cells.forEach { if (it != EMPTY && (it < 1 || it > size)) return false }
+		return true
+	}
+
+	fun isViable(): Boolean {
+		/*	If the grid has any duplicate values in any group or if there are cells that have
+		 	no possible allowed values then an incorrect move has been previously made and the
+			grid has no solution. */
+
+		return !hasDuplicates() && !hasUnusable()
+	}
+
 	fun hasDuplicates(): Boolean {
+		/*	Checks whether there are any groups (columns, rows, boxes) that have more than one
+			of any value. */
+
 		val seen = BooleanArray(1 + size)		// EMPTY + 1..size
 
 		// check for duplicates in each column
@@ -237,6 +251,18 @@ public class Grid {
 		return false
 	}
 
+	fun hasUnusable(): Boolean {
+		/*	Checks whether there are any cells that have no possible allowed values; i.e., if
+		 	there's a cell for whom all values have been eliminated as possibilities by the
+			other values in its column, row or box. */
+
+		for (i in 1..numCells())
+			if (getPossibilities(i).size == 0)
+				return true;
+
+		return false
+	}
+
 	fun toCsv(): String {
 		val buf = StringBuffer()
 		try { toCsv(buf) } catch (e: Exception) {}
@@ -260,14 +286,11 @@ public class Grid {
 	}
 
 	@JvmOverloads
-	fun toString(highlightNth: Int = -1): String {
+	fun toString(primaryHighlightNth: Int? = null,
+			secondaryHighlightNths: IntArray? = null): String {
 		val result = StringBuffer()
 		var col = 1
 		var row = 1
-		var nth = 1
-
-		// ASCI 14 - turn on Unix terminal line graphics mode
-		result.append(14.toChar())
 
 		for (y in 0..numBands() * (boxHeight + 1)) {
 			for (x in 0..numStacks() * (boxWidth + 1)) {
@@ -307,24 +330,25 @@ public class Grid {
 					assert(row <= numRows())
 					assert(col <= numColumns())
 
-					if (getCell(col, row) == EMPTY)
-						s = "   "
-					else {
-						val cell = getCell(col, row)
-						if (size > 9 && size <= 26)
-							s = " " + ('A'.toInt() - 1 + cell).toChar() + " "
-						else {
-							s = Integer.toString(cell)
-							var left = " "
-							var right = " "
-							if (nth++ == highlightNth) {
-								left = "("
-								right = ")"
-							}
-							if (s.length < 3) s = left + s
-							if (s.length < 3) s = s + right
-						}
+					val cell = getCell(col, row)
+					s = when {
+						cell == EMPTY -> " "
+						size > 9 && size <= 26 -> (('A'.toInt() - 1 + cell).toChar()).toString()
+						else -> Integer.toString(cell)
 					}
+
+					var left = " "
+					var right = " "
+					if (toNth(col, row) == primaryHighlightNth) {
+						left = "<"
+						right = ">"
+					} else if (secondaryHighlightNths != null &&
+							toNth(col, row) in secondaryHighlightNths) {
+						left = "("
+						right = ")"
+					}
+					if (s.length < 3) s = s + right
+					if (s.length < 3) s = left + s
 
 					if (++col > numColumns()) {
 						col = 1
@@ -337,9 +361,6 @@ public class Grid {
 
 			result.append('\n')
 		}
-
-		// ASCI 15 - turn off Unix terminal line graphics mode
-		result.append(15.toChar())
 
 		return result.toString()
 	}
@@ -395,6 +416,7 @@ public class Grid {
 						val g = Grid(size, boxWidth, boxHeight, cells, DeserializedType.DESERIALIZED)
 						if (!g.isLegal()) throw JsonParseException("Illegal (out of range) cell values")
 
+						assert(g.isLegal())
 						return g
 					}
 				}

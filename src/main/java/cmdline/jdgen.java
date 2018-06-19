@@ -43,7 +43,7 @@ public class jdgen {
 					} catch (NumberFormatException e) {
 						syserrln("bad argument: " + args[i]);
 					} catch (IllegalArgumentException e) {
-						syserrln("bad size: " + e.toString());
+						syserrln("bad size: " + e.getMessage());
 					}
 				} else if (args[i].startsWith("--box=")) {
 					try {
@@ -59,7 +59,7 @@ public class jdgen {
 					} catch (NumberFormatException e) {
 						syserrln("bad argument: " + args[i]);
 					} catch (IllegalArgumentException e) {
-						syserrln("bad dimensions: " + e.toString());
+						syserrln("bad dimensions: " + e.getMessage());
 					}
 				} else if (args[i].startsWith("--sym=")) {
 					String mode = args[i].substring(6);
@@ -74,13 +74,13 @@ public class jdgen {
 					try {
 						optionCsv = new FileWriter(args[i].substring(6));
 					} catch (IOException e) {
-						syserrln("unable to write to file: " + e.toString());
+						syserrln("unable to write to file: " + e.getMessage());
 					}
 				} else if (args[i].startsWith("--json=")) {
 					try {
 						optionJson = new FileWriter(args[i].substring(7));
 					} catch (IOException e) {
-						syserrln("unable to write to file: " + e.toString());
+						syserrln("unable to write to file: " + e.getMessage());
 					}
 				} else if (args[i].equals("--empty")) {
 					optionEmpty = true;
@@ -99,13 +99,13 @@ public class jdgen {
 		try {
 			if (optionCsv != null) optionCsv.close();
 		} catch (IOException e) {
-			syserrln("unable to write to file: " + e.toString());
+			syserrln("unable to write to file: " + e.getMessage());
 		}
 
 		try {
 			if (optionJson != null) optionJson.close();
 		} catch (IOException e) {
-			syserrln("unable to write to file: " + e.toString());
+			syserrln("unable to write to file: " + e.getMessage());
 		}
 	}
 
@@ -136,12 +136,12 @@ public class jdgen {
 		String me = Util.callersSimpleClassName();
 		String version = Util.jarVersion();
 		String title = Util.jarTitle();
-		String copyright = Util.jarCopyright();
+		String vendor = Util.jarVendor();
 
 		System.out.println(me + " " + (version == null ? "" : version));
 		if (title != null) System.out.print(title + ". ");
-		if (copyright != null) System.out.print(copyright);
-		if (title != null || copyright != null) System.out.println();
+		if (vendor != null) System.out.print(vendor);
+		if (title != null || vendor != null) System.out.println();
 
 		System.exit(1);
 	}
@@ -159,7 +159,7 @@ public class jdgen {
 			try {
 				generator = new Generator(g);
 			} catch (IllegalArgumentException e) {
-				syserrln("invalid prototype: " + e.toString());
+				syserrln("invalid prototype: " + e.getMessage());
 				return;			// unreachable
 			}
 
@@ -173,7 +173,7 @@ public class jdgen {
 			if (optionCsv != null) result.toCsv(optionCsv);
 			if (optionJson != null) result.toJson(optionJson);
 		} catch (IOException e) {
-			syserrln("unable to write to file: " + e.toString());
+			syserrln("unable to write to file: " + e.getMessage());
 		}
 	}
 

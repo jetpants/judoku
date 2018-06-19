@@ -1,0 +1,9 @@
+#!/bin/bash
+
+ME="`basename "$0"`"
+PROJ_ROOT="`dirname "$0"`/.."
+LIBS="$PROJ_ROOT/build/libs"
+CMDLINE="$PROJ_ROOT/build/classes/java/main/cmdline"
+JAR="$LIBS/`ls "$LIBS" | tail -n 1`"
+
+java -cp "$CMDLINE:$JAR:$CLASSPATH" cmdline.$ME "$@"

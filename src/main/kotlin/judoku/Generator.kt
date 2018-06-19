@@ -23,7 +23,7 @@ class Generator(private val prototype: Grid) {
     private var cached: Grid? = null
 
     init {
-        require (prototype.isLegal()) { "Prototype has illegal values and no solution" }
+        check(prototype.isLegal())
 
         /*  generating solutions takes time. Although it's only used here for validation,
             don't throw away the result - we can use it later */
@@ -101,7 +101,9 @@ class Generator(private val prototype: Grid) {
         val solution = cached       // the solution that was used to validate the constructor argument
         cached = null               // can be used one time only
 
-        var out = if (solution != null) solution else {
+        var out = if (solution != null)
+            solution
+        else {
             val solutions = Solver.findSolutions(prototype, 1)
             assert(solutions.size == 1)
             solutions[0]

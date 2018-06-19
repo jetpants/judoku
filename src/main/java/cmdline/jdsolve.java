@@ -46,15 +46,14 @@ public class jdsolve {
 					try {
 						optionCsv = new FileWriter(args[i].substring(6));
 					} catch (IOException e) {
-						syserrln("unable to write to file: " + e.toString());
+						syserrln("unable to write to file: " + e.getMessage());
 					}
 				} else if (args[i].startsWith("--json=")) {
 					try {
 						optionJson = new FileWriter(args[i].substring(7));
 					} catch (IOException e) {
-						syserrln("unable to write to file: " + e.toString());
+						syserrln("unable to write to file: " + e.getMessage());
 					}
-
 				} else
 					syserrln("unknown option: " + args[i]);
 
@@ -80,13 +79,13 @@ public class jdsolve {
 		try {
 			if (optionCsv != null) optionCsv.close();
 		} catch (IOException e) {
-			syserrln("unable to write to file: " + e.toString());
+			syserrln("unable to write to file: " + e.getMessage());
 		}
 
 		try {
 			if (optionJson != null) optionJson.close();
 		} catch (IOException e) {
-			syserrln("unable to write to file: " + e.toString());
+			syserrln("unable to write to file: " + e.getMessage());
 		}
 	}
 
@@ -110,12 +109,12 @@ public class jdsolve {
 		String me = Util.callersSimpleClassName();
 		String version = Util.jarVersion();
 		String title = Util.jarTitle();
-		String copyright = Util.jarCopyright();
+		String vendor = Util.jarVendor();
 
 		System.out.println(me + " " + (version == null ? "" : version));
 		if (title != null) System.out.print(title + ". ");
-		if (copyright != null) System.out.print(copyright);
-		if (title != null || copyright != null) System.out.println();
+		if (vendor != null) System.out.print(vendor);
+		if (title != null || vendor != null) System.out.println();
 
 		System.exit(1);
 	}
@@ -130,18 +129,14 @@ public class jdsolve {
 
 		try {
 			g = Grid.newFromJson(new java.io.FileReader(file));
+			assert(g != null);
 		} catch (Exception e) {
-			syserrln("cannot read grid: " + file + ": " + e.toString());
+			syserrln("cannot read grid: " + file + ": " + e.getMessage());
 			return;			// unreachable
 		}
 
-		if (!g.isLegal()) {
-			syserrln("grid has illegal values therefore no solution: " + file);
-			return;			// unreachable
-		}
-
-		if (g.hasDuplicates()) {
-			syserrln("grid has duplicates and therefore no solution: " + file);
+		if (!g.isViable()) {
+			syserrln("grid has no solution: " + file);
 			return;			// unreachable
 		}
 
@@ -164,7 +159,7 @@ public class jdsolve {
 						if (optionCsv != null) s.toCsv(optionCsv);
 						if (optionJson != null) s.toJson(optionJson);
 					} catch (IOException e) {
-						syserrln("unable to write to file: " + e.toString());
+						syserrln("unable to write to file: " + e.getMessage());
 					}
 			}
 		}

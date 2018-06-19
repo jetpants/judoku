@@ -18,22 +18,36 @@ package judoku
 
 class Solver(private val puzzle: Grid) {
     init {
-        require(puzzle.isLegal()) { "Grid has invalid state and no solutions" }
+        check(puzzle.isLegal())
     }
 
     fun findSolutions(maxSolutions: Int): Array<Grid> {
         val solutions = ArrayList<Grid>(maxSolutions)
-        val n = search(puzzle, solutions, maxSolutions)
+        val n = traverse(puzzle, solutions, maxSolutions)
         assert(n == solutions.size) { n }
         val results = arrayOfNulls<Grid>(n)
         return solutions.toArray(results)
     }
 
-    fun countSolutions(maxSolutions: Int): Int = search(puzzle, null, maxSolutions)
+    fun countSolutions(maxSolutions: Int): Int = traverse(puzzle, null, maxSolutions)
 
-    fun hasUniqueSolution(): Boolean  = countSolutions(2) == 1          // one and only one
+    fun suggestMove(): Move? {
+        /*  If the puzzle has duplicates or unusable cells, then no sequence of moves will
+            yield a solution. */
+        if (!puzzle.isViable()) return null;
+
+        check(puzzle.isLegal());
+        check(puzzle.isViable());
+
+        val matrix = Matrix(puzzle)
+        return matrix.suggestMove()
+    }
+
+    fun hasUniqueSolution(): Boolean  = countSolutions(2) == 1      // one and only one
 
     fun isMinimal(): Boolean {
+        if (!puzzle.isViable()) return false;
+
         for (nth in 1..puzzle.numCells())
             if (!puzzle.isEmpty(nth) && countSolutions(puzzle.withCellEmpty(nth), 2) < 2)
                 return false
@@ -58,6 +72,9 @@ class Solver(private val puzzle: Grid) {
             Solver(puzzle).countSolutions(maxSolutions)
 
         @JvmStatic
+        fun suggestMove(puzzle: Grid): Move? = Solver(puzzle).suggestMove()
+
+        @JvmStatic
         fun hasUniqueSolution(grid: Grid): Boolean = Solver(grid).hasUniqueSolution()
 
         @JvmStatic
@@ -66,42 +83,69 @@ class Solver(private val puzzle: Grid) {
         @JvmStatic
         fun isProper(grid: Grid): Boolean = Solver(grid).isProper()
 
-        private fun search(template: Grid, solutions: ArrayList<Grid>?, maxSolutions: Int): Int {
-            assert(template.isLegal())
-
-            // lots of strategies that could be added here: http://www.sudokudragon.com/sudokustrategy.htm
-            return bruteForce(template, solutions, maxSolutions)
+        private fun traverse(template: Grid, solutions: ArrayList<Grid>?, maxSolutions: Int): Int {
+            if (!template.isViable()) return 0;           // there are no solutions
+            return _traverse(template, solutions, maxSolutions)
         }
 
-        private fun bruteForce(template: Grid, solutions: ArrayList<Grid>?, max: Int): Int {
+        private fun _traverse(template: Grid, solutions: ArrayList<Grid>?, max: Int): Int {
             if (max == 0) return 0
 
-            var nth = -1
+            var nth = nextCell(template)
 
-            for (i in 1..template.numCells())
-                if (template.isEmpty(i)) {
-                    nth = i
-                    break
-                }
-
-            if (nth < 0) {
+            if (nth == null) {
                 // no more empty cells, a solution has been found
-                assert(template.isLegal())
+                check(template.isLegal())
                 if (solutions != null) solutions.add(template)
                 return 1
             }
 
-            val values = template.getCandidates(nth)
-            Util.shuffle(values)
+            val possibilities = template.getPossibilities(nth)
+            Util.shuffle(possibilities)
 
             var found = 0
 
-            for (value in values) {
-                val candidate = template.withCell(nth, value)
-                found += bruteForce(candidate, solutions, max - found)
+            for (possibility in possibilities) {
+                val next = template.withCell(nth, possibility)
+                found += _traverse(next, solutions, max - found)
             }
 
             return found
+        }
+
+        private fun nextCell(g: Grid): Int? {
+            /*  The search performs a depth-first traversal of the tree of all possible grid
+                cell-value combinations. From a given board there is a tree of grids that
+                descends from this node that terminates in leaf nodes that are either complete
+                solutions or in nodes where the grids are incomplete but have no further
+                possible moves. This method determines the order in which that sub-tree is
+                searched.
+
+                If there are two empty cells and one could have any of six possible values and
+                another could only have two, then it makes sense to search the sub-tree
+                descending from the latter cell first because, a priori, if there is a solution
+                then there's a one-in-two chance of finding it here, as opposed to a one-in-six
+                chance of finding it in the sub-tree off the other empty cell.
+
+                This method finds the empty cell that has the fewest possible values. This
+                method used to search simply for the first empty cell. When I changed it to look
+                for the empty cell with the fewest possibilities, the time to find a grid's
+                solution dropped to a third! Thanks to Norvig for the optimisation!
+                http://norvig.com/sudoku.html */
+
+            var best : Int? = null
+            var count = Int.MAX_VALUE
+
+            for (nth in 1..g.numCells())
+                if (g.isEmpty(nth)) {
+                    val c = g.getPossibilities(nth).size
+                    if (c < count) {
+                        best = nth
+                        count = c
+                    }
+                }
+
+            return best
         }
     }
 }

@@ -59,10 +59,10 @@ public class jdspeed {
 		} else
 			try {
 				Grid g = Grid.newFromJson(new java.io.FileReader(file));
-				assert(g != null && g.isLegal());
+				assert(g != null);
 
-				if (g.hasDuplicates()) {
-					syserrln("grid has duplicates and therefore no solution: " + file);
+				if (!g.isViable()) {
+					syserrln("grid has no solution: " + file);
 					return;
 				}
 
@@ -70,9 +70,9 @@ public class jdspeed {
 
 				speedtest(new Grid[] { g });
 			} catch (java.io.IOException e) {
-				syserrln("cannot read file: " + file);
+				syserrln("cannot read file: " + e.getMessage());
 			} catch (Exception e) {
-				syserrln("bad JSON or values: " + file);
+				syserrln("bad JSON or values: " + e.getMessage());
 			}
 	}
 
@@ -94,12 +94,12 @@ public class jdspeed {
 		String me = Util.callersSimpleClassName();
 		String version = Util.jarVersion();
 		String title = Util.jarTitle();
-		String copyright = Util.jarCopyright();
+		String vendor = Util.jarVendor();
 
 		System.out.println(me + " " + (version == null ? "" : version));
 		if (title != null) System.out.print(title + ". ");
-		if (copyright != null) System.out.print(copyright);
-		if (title != null || copyright != null) System.out.println();
+		if (vendor != null) System.out.print(vendor);
+		if (title != null || vendor != null) System.out.println();
 
 		System.exit(1);
 	}
@@ -130,7 +130,7 @@ public class jdspeed {
 	}
 
 	private static void speedtest(Grid[] testGrids) {
-		String prompt = "\rSolving test-grids... ";
+		String prompt = "\rSolving test-grids...... ";
 
 		/*	why use nanoTime() and not currentTimeMillis()? - for a fascinating answer, see
 			here: https://stackoverflow.com/a/1776053 */

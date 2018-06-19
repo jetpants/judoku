@@ -53,26 +53,13 @@ object Util {
     }
 
     @JvmStatic
-    fun jarCopyright(): String? {
+    fun jarVendor(): String? {
         // configured in <project-root>/build.gradle
-        val cl = Util::class.java.getClassLoader() as java.net.URLClassLoader
-
-        try {
-            val url = cl.findResource("META-INF/MANIFEST.MF")
-
-            if (url != null) {
-                val manifest = java.util.jar.Manifest(url.openStream())
-                val mainAttributes = manifest.getMainAttributes()
-                return mainAttributes.getValue("Implementation-Copyright")
-            }
-        } catch (E: java.io.IOException) {
-        }
-
-        return null
+        return Util::class.java.getPackage().getImplementationVendor()
     }
 
     @JvmStatic
-    /*package*/ fun shuffle(array: IntArray) {
+    internal fun shuffle(array: IntArray) {
         // Fisher-Yates shuffle algorithm
         for (i in array.size - 1 downTo 1) {
             val j = random.nextInt(i + 1)

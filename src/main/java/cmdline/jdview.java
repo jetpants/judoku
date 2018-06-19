@@ -55,7 +55,7 @@ public class jdview {
 	private static void usage() {
 		System.out.println(
 		//--------1---------2---------3---------4---------5---------6---------7---------8
-		"Usage: " + Util.callersSimpleClassName() + " FILE...\n" +
+		"Usage: " + Util.callersSimpleClassName() + " JSONFILE...\n" +
 		"Graphically display the grid stored in the JSON file."
 		);
 
@@ -66,12 +66,12 @@ public class jdview {
 		String me = Util.callersSimpleClassName();
 		String version = Util.jarVersion();
 		String title = Util.jarTitle();
-		String copyright = Util.jarCopyright();
+		String vendor = Util.jarVendor();
 
 		System.out.println(me + " " + (version == null ? "" : version));
 		if (title != null) System.out.print(title + ". ");
-		if (copyright != null) System.out.print(copyright);
-		if (title != null || copyright != null) System.out.println();
+		if (vendor != null) System.out.print(vendor);
+		if (title != null || vendor != null) System.out.println();
 
 		System.exit(1);
 	}
@@ -84,7 +84,7 @@ public class jdview {
 	private static void loadAndShow(String file) {
 		try {
 			Grid g = Grid.newFromJson(new java.io.FileReader(file));
-			assert(g != null && g.isLegal());
+			assert(g != null);
 
 			System.out.println(g.toString());
 		} catch (IOException e) {

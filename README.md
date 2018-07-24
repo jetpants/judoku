@@ -7,9 +7,10 @@ This started out as a project to test some ideas around JVM optimisations for lo
 
 Time to brute-force recursively solve puzzles started out at 21 ms. Applying different optimisation strategies, some with scale factors of improvement reduced this ultimately by 99.6%.
 
-Anyhow, this library produces beautiful sudoku grids and solves given puzzles super fast. It supports arbitrary sizes,
-like 4x4 or 16x16, in addition to the normal 9x9. The sub-boxes don't need to be square; you can have a 6x6 made up of 3x2
-boxes if you like.
+Anyhow, this library produces beautiful sudoku grids and solves given puzzles fast. It supports arbitrary sizes,
+like 4x4 or 16x16, in addition to the normal 9x9. The sub-boxes don't even need to be square; you can have a 6x6 made up of 3x2 boxes if you like:
+
+![6x6](https://imgur.com/a/y97UT15)
 
 I wrote some articles on what I discovered. It's a series looking at the JVM, sudoku strategies, some Kotlin coding techniques:
 

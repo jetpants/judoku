@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="JUnit Jupiter" tests="0" skipped="0" failures="0" errors="0" time="0.008" hostname="Steves-MacBook-Air.local" timestamp="2018-08-04T20:56:43">
+<testsuite name="JUnit Jupiter" tests="2" skipped="0" failures="0" errors="0" time="0.065" hostname="Steves-MacBook-Air.local" timestamp="2018-08-04T22:29:17">
 <properties>
 <property name="awt.toolkit" value="sun.lwawt.macosx.LWCToolkit"/>
 <property name="file.encoding" value="UTF-8"/>
@@ -60,6 +60,18 @@
 <property name="user.timezone" value="Europe/Madrid"/>
 <property name="user.variant" value=""/>
 </properties>
+<testcase name="constructor_grid_6()" classname="judoku.GridTest" time="0.015">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:judoku.GridTest]/[method:constructor_grid_6()]
+display-name: constructor_grid_6()
+]]></system-out>
+</testcase>
+<testcase name="constructor_grid_9()" classname="judoku.GridTest" time="0.002">
+<system-out><![CDATA[
+unique-id: [engine:junit-jupiter]/[class:judoku.GridTest]/[method:constructor_grid_9()]
+display-name: constructor_grid_9()
+]]></system-out>
+</testcase>
 <system-out><![CDATA[
 unique-id: [engine:junit-jupiter]
 display-name: JUnit Jupiter

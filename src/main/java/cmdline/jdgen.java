@@ -144,15 +144,8 @@ public class jdgen {
 		Grid result = g;
 
 		if (!optionEmpty) {
-			Generator generator;
-			try {
-				generator = new Generator(g);
-			} catch (IllegalArgumentException e) {
-				syserrln("invalid prototype: " + e.getMessage());
-				return;			// unreachable
-			}
-
-			result = generator.generate(optionSymmetry, !optionFast /*fast != minimal*/);
+			result = Generator.generate(g.getBoxWidth(), g.getBoxHeight(),
+				optionSymmetry, !optionFast /*fast != minimal*/);
 			assert optionFast || Solver.isProper(result);
 		}
 

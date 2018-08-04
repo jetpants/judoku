@@ -1,0 +1,48 @@
+
+
+/** https://www.w3schools.com/cssref/css_colors.asp **/
+
+.tabPane {
+}	
+
+.tabHeaders {
+	padding-bottom: 5px;
+}
+.tabTitle {
+	padding: 5px 15px 5px 15px;
+	text-align: center;
+	border-bottom: 2px solid;
+}
+.tabTitle a {
+	text-decoration: none;
+}
+.selectedTabTitle {
+	padding: 5px 15px 5px 15px;
+	text-align: center;
+	font-weight: bold;
+	border-left: 2px solid;
+	border-right: 2px solid;
+	border-top: 2px solid;
+}
+.selectedTabTitle a {
+	text-decoration: none;
+}
+
+.mainSummary {
+	display: inline-block;
+	padding-left: 100px;
+}
+.totalPercent {
+	display: inline-block;
+	vertical-align: top;
+	padding-left: 100px;
+}
+
+tr.jsonRow:hover {
+	background-color: #EAEAEA;
+}
+
+td.jsonCell {
+	vertical-align: top;
+}
+}

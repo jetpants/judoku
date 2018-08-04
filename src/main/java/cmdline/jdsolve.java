@@ -1,24 +1,9 @@
-/*	Copyright (C) 2018 Steve Ball <jetpants@gmail.com>
-
-	This file is part of Judoku. Judoku is free software: you can redistribute
-	it and/or modify it under the terms of the GNU General Public License as
-	published by the Free Software Foundation, either version 3 of the License,
-	or (at your option) any later version.
-
-    Judoku is distributed in the hope that it will be useful, but WITHOUT ANY
-    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-    details.
-
-    You should have received a copy of the GNU General Public License along with
-    Judoku. If not, see <http://www.gnu.org/licenses/>.
-*/
-
 package cmdline;
 
 import java.io.IOException;
 import java.io.FileWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import judoku.Grid;
 import judoku.Solver;
 import judoku.Util;
@@ -148,9 +133,9 @@ public class jdsolve {
 		} else {
 			System.out.println(g.toString());
 
-			Grid[] solutions = solver.findSolutions(optionMaxSolutions);
+			ArrayList<Grid> solutions = solver.findSolutions(optionMaxSolutions);
 
-			if (solutions.length == 0)
+			if (solutions.size() == 0)
 				syserrln("grid has no solution: " + file);
 			else {
 				for (Grid s : solutions)

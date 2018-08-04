@@ -1,24 +1,9 @@
-/*	Copyright (C) 2018 Steve Ball <jetpants@gmail.com>
-
-	This file is part of Judoku. Judoku is free software: you can redistribute
-	it and/or modify it under the terms of the GNU General Public License as
-	published by the Free Software Foundation, either version 3 of the License,
-	or (at your option) any later version.
-
-    Judoku is distributed in the hope that it will be useful, but WITHOUT ANY
-    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-    details.
-
-    You should have received a copy of the GNU General Public License along with
-    Judoku. If not, see <http://www.gnu.org/licenses/>.
-*/
-
 package cmdline;
 
 import judoku.Generator;
 import judoku.Grid;
 import judoku.Solver;
+import judoku.Symmetry;
 import judoku.Util;
 
 public class jdspeed {
@@ -39,6 +24,24 @@ public class jdspeed {
 					} catch (NumberFormatException e) {
 						syserrln("bad argument: " + args[i]);
 					}
+				else if (args[i].equals("--lean")) {
+					optionLean = true;
+					ClassLoader loader = ClassLoader.getSystemClassLoader();
+    				loader.setDefaultAssertionStatus(false);
+					loader.setPackageAssertionStatus("judoku", false);
+				} else if (args[i].startsWith("--seed="))
+					try {
+						optionSeed = Long.parseLong(args[i].substring(7));
+					} catch (NumberFormatException e) {
+						syserrln("bad argument: " + args[i]);
+					}
+				else if (args[i].startsWith("--force="))
+					try {
+						optionForceSeconds = Double.parseDouble(args[i].substring(8));
+					} catch (NumberFormatException e) {
+						syserrln("bad argument: " + args[i]);
+					}
+
 				else
 					syserrln("unknown option: " + args[i]);
 
@@ -51,6 +54,8 @@ public class jdspeed {
 				file = arg;
 			} else if (arg.equals("--"))
 				endOfOptions = true;
+
+		Util.setRandom(new java.util.Random(optionSeed));
 
 		if (file == null) {
 			int n = (optionN + TESTS_PER_GRID - 1) / TESTS_PER_GRID;
@@ -84,7 +89,9 @@ public class jdspeed {
 
 		"  JSONFILE    Test the speed by solving this puzzle multiple times. If no file\n" +
 		"              is given, testing is performed using randomly generated puzzles.\n" +
-		"  --n=N       Run N tests (default: " + optionN + ")."
+		"  --n=N       Run N tests (default: " + optionN + ").\n" +
+		"  --real      Disable assertions and don't display the percentage progress.\n" +
+		"  --seed=N    Seeds the random number generator with N (default: " + optionSeed + ")."
 		);
 
 		System.exit(0);
@@ -110,6 +117,8 @@ public class jdspeed {
 	}
 
 	private static Grid[] genTestGrids(int n) {
+		if (optionForceSeconds != 0.0) return null;
+
 		/*	increasing 'n' doesn't increase the number of solutions that are part of the test,
 		  	only the number of test grids. Increasing the number of test grids should minimise
 		  	variance in the average time. Some grids are much quicker to solve than others. */
@@ -118,11 +127,18 @@ public class jdspeed {
 
 		Grid[] out = new Grid[n];
 
-		String prompt = "\rGenerating test-grids... ";
+		String prompt = "\rGenerating test-puzzles... ";
+		System.out.print(prompt);
+
+		int percent = -1;
 
 		for (int i = 0; i < out.length; ++i) {
-			System.out.print(prompt + String.format("%.0f", 100.0 * i / out.length) + "%");
-			out[i] = generator.generate(Generator.Symmetry.ROTATE180, false);
+			if (!optionLean) {
+				int p = (int) Math.round(100.0 * i / out.length);
+				if (p != percent) System.out.print(prompt + (percent = p) + "%");
+			}
+
+			out[i] = generator.generate(Symmetry.NONE, false /*minimal*/);
 		}
 
 		System.out.println(prompt + "100%");
@@ -130,30 +146,62 @@ public class jdspeed {
 	}
 
 	private static void speedtest(Grid[] testGrids) {
-		String prompt = "\rSolving test-grids...... ";
+		double seconds = solveTestGrids(testGrids);
 
-		/*	why use nanoTime() and not currentTimeMillis()? - for a fascinating answer, see
-			here: https://stackoverflow.com/a/1776053 */
+		String bold = Util.isAnsiTerminal() ? Util.ANSI_BOLD : "";
+		String norm = Util.isAnsiTerminal() ? Util.ANSI_NORMAL : "";
+
+		System.out.println();
+		System.out.println("  Elapsed time:        " + bold + String.format("%,.1f", seconds) + " s" + norm);
+		System.out.println("  Puzzles solved:      " + bold + String.format("%,d", optionN) + norm);
+		System.out.println("  Solutions/second:    " + bold + String.format("%,.0f", optionN / seconds) + norm);
+		System.out.println("  Avg-time/solution:   " + bold + String.format("%,.0f", seconds * 1000000 / optionN) + " µs" + norm);
+	}
+
+	private static double solveTestGrids(Grid[] testGrids) {
+		if (optionForceSeconds != 0.0) return optionForceSeconds;
+
+		String prompt = "\rSolving test-puzzles...... ";
+		System.out.print(prompt);
+
+		int percent = -1;
+
+		/*	why use nanoTime() and not currentTimeMillis()? - for a fascinating answer,
+			see here: https://stackoverflow.com/a/1776053 */
 		long start = System.nanoTime();
 
 		for (int i = 0; i < optionN; ++i) {
-			System.out.print(prompt + String.format("%.0f", 100.0 * i / optionN) + "%");
+			if (!optionLean) {
+				int p = (int) Math.round(100.0 * i / optionN);
+				if (p != percent) System.out.print(prompt + (percent = p) + "%");
+			}
+
 			int n = Solver.countSolutions(testGrids[i % testGrids.length], 1);
 			assert n == 1;
 		}
 
 		long elapsed = System.nanoTime() - start;
-		double seconds = elapsed / 1000000000.0;
 
-		System.out.println(prompt + "100%\n");
-		System.out.println("Elapsed time:    " + String.format("%,.1f", seconds) + "s");
-		System.out.println("Number grids:    " + String.format("%,d", optionN));
-		System.out.println("Grids/second:    " + String.format("%,.0f", optionN / seconds));
+		System.out.println(prompt + "100%");
+
+		return elapsed / 1000000000.0;
 	}
 
-	private static int optionN = 1000;		//number of solutions in test
+	private static int optionN = 10000;		// default number of solutions in test
+
+	/*	Default random number seed. Very important for consistent timings as grids vary greatly
+		in complexity and time to solve. */
+	private static long optionSeed = 0L;
+
+	/*	This option disables assertions and suppresses the displaying of the percentage
+		progress bar, which gives slightly more accurate timings. */
+	private static boolean optionLean = false;
+
+	// this was useful for quickly re-generating screenshots of the timings if I changed the
+	// format of the output for some optimisation articles I was writing
+	private static double optionForceSeconds = 0.0;
 
 	// this number has been tuned such that the program spends about as much time generating
 	// puzzles as solving them
-	private static final int TESTS_PER_GRID = 20;
+	private static final int TESTS_PER_GRID = 65;
 }

@@ -1,19 +1,3 @@
-/*	Copyright (C) 2018 Steve Ball <jetpants@gmail.com>
-
-	This file is part of Judoku. Judoku is free software: you can redistribute
-	it and/or modify it under the terms of the GNU General Public License as
-	published by the Free Software Foundation, either version 3 of the License,
-	or (at your option) any later version.
-
-    Judoku is distributed in the hope that it will be useful, but WITHOUT ANY
-    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-    details.
-
-    You should have received a copy of the GNU General Public License along with
-    Judoku. If not, see <http://www.gnu.org/licenses/>.
-*/
-
 package cmdline;
 
 import java.io.IOException;
@@ -21,10 +5,7 @@ import java.io.FileWriter;
 import java.io.Writer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import judoku.Grid;
-import judoku.Generator;
-import judoku.Solver;
-import judoku.Util;
+import judoku.*;
 
 public class jdgen {
 	public static void main(String[] args) {
@@ -63,13 +44,13 @@ public class jdgen {
 					}
 				} else if (args[i].startsWith("--sym=")) {
 					String mode = args[i].substring(6);
-					Generator.Symmetry sym = Generator.Symmetry.toSymmetry(mode);
+					Symmetry sym = Symmetry.toSymmetry(mode);
 					if (sym == null)
 						syserrln("unknown symmetry mode: " + mode);
 					else
 						optionSymmetry = sym;
-				} else if (args[i].equals("--strict")) {
-					optionStrict = true;
+				} else if (args[i].equals("--fast")) {
+					optionFast = true;
 				} else if (args[i].startsWith("--csv=")) {
 					try {
 						optionCsv = new FileWriter(args[i].substring(6));
@@ -84,7 +65,14 @@ public class jdgen {
 					}
 				} else if (args[i].equals("--empty")) {
 					optionEmpty = true;
-				} else
+				} else if (args[i].startsWith("--seed="))
+					try {
+						long n = Long.parseLong(args[i].substring(7));
+						Util.setRandom(new java.util.Random(n));
+					} catch (NumberFormatException e) {
+						syserrln("bad argument: " + args[i]);
+					}
+				else
 					syserrln("unknown option: " + args[i]);
 
 		boolean endOfOptions = false;
@@ -113,20 +101,21 @@ public class jdgen {
 		System.out.println(
 		//--------1---------2---------3---------4---------5---------6---------7---------8
 		"Usage: " + Util.callersSimpleClassName() + " [OPTION]...\n" +
-		"Generate a grid for a 'proper' puzzle. A proper puzzle is a grid that only has\n" +
-		"one solution and, additionally, where removing any one of its givens would\n" +
-		"yield a puzzle that had more than one solution.\n\n" +
+		"Generate a grid for a 'proper' puzzle. A proper puzzle is a grid that has only\n" +
+		"one solution and, additionally, where removing any one of its clues would\n" +
+		"yield a puzzle that would no longer have a unique solution.\n\n" +
 
 		"  --size=N       A square grid of size N\n" +
 		"  --box=W,H      Grid with boxes of width W and height H\n" +
 		"  --sym=MODE     Symmetry mode, one of the following (or unique prefix of):\n" +
 		"                 rotate180 (default), diagonal, horizontal, vertical, none,\n" +
 		"                 random\n" +
-		"  --strict       Stricly proper (but slower). Default is that puzzles may have\n" +
-		"                 one additional given more than needed to be solvable\n" +
+		"  --fast         Quicker but puzzles may not be proper; there may be one more\n" +
+		"                 extra clue than strictly required to have a unique solution\n" +
 		"  --csv=FILE     Write corresponding CSV representation to FILE\n" +
 		"  --json=FILE    Write corresponding JSON representation to FILE\n" +
-		"  --empty        Generate an empty grid of the requested size"
+		"  --empty        Generate an empty grid of the requested size\n" +
+		"  --seed=SEED    Seeds the random number generator with SEED."
 		);
 
 		System.exit(0);
@@ -163,8 +152,8 @@ public class jdgen {
 				return;			// unreachable
 			}
 
-			result = generator.generate(optionSymmetry, optionStrict);
-			assert !optionStrict || Solver.isProper(result);
+			result = generator.generate(optionSymmetry, !optionFast /*fast != minimal*/);
+			assert optionFast || Solver.isProper(result);
 		}
 
 		System.out.println(result.toString());
@@ -177,8 +166,8 @@ public class jdgen {
 		}
 	}
 
-	private static Generator.Symmetry optionSymmetry = Generator.Symmetry.ROTATE180;
-	private static boolean optionStrict = false;
+	private static Symmetry optionSymmetry = Symmetry.ROTATE180;
+	private static boolean optionFast = false;
 	private static Writer optionCsv = null;
 	private static Writer optionJson = null;
 	private static boolean optionEmpty = false;

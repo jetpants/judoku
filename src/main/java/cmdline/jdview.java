@@ -1,23 +1,8 @@
-/*	Copyright (C) 2018 Steve Ball <jetpants@gmail.com>
-
-	This file is part of Judoku. Judoku is free software: you can redistribute
-	it and/or modify it under the terms of the GNU General Public License as
-	published by the Free Software Foundation, either version 3 of the License,
-	or (at your option) any later version.
-
-    Judoku is distributed in the hope that it will be useful, but WITHOUT ANY
-    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-    details.
-
-    You should have received a copy of the GNU General Public License along with
-    Judoku. If not, see <http://www.gnu.org/licenses/>.
-*/
-
 package cmdline;
 
 import java.io.IOException;
 import judoku.Grid;
+import judoku.Solver;
 import judoku.Util;
 
 public class jdview {
@@ -45,7 +30,7 @@ public class jdview {
 		endOfOptions = false;
 		for (String arg : args)
 			if (endOfOptions || !arg.startsWith("--")) {
-				if (numFiles > 1) System.out.println(arg);
+				if (numFiles > 1) System.out.println("\n" + arg);
 				loadAndShow(arg);
 			} else if (arg.equals("--"))
 				endOfOptions = true;
@@ -82,15 +67,40 @@ public class jdview {
 	}
 
 	private static void loadAndShow(String file) {
-		try {
-			Grid g = Grid.newFromJson(new java.io.FileReader(file));
-			assert(g != null);
+		Grid g = null;
 
-			System.out.println(g.toString());
+		try {
+			g = Grid.newFromJson(new java.io.FileReader(file));
 		} catch (IOException e) {
 			syserrln("cannot read file: " + file);
 		} catch (Exception e) {
 			syserrln("bad JSON or values: " + file);
 		}
+
+		assert(g != null);
+
+		System.out.println(g.toString());
+		System.out.println("total cells            " + g.getNumCells());
+		System.out.println("filled/empty cells     " + g.numFilledCells() + "/" + g.numEmptyCells());
+		System.out.println("is viable              " + g.isViable());
+		System.out.println("  - no duplicates      " + !g.hasDuplicates());
+		System.out.println("  - no zombie cells    " + !g.hasZombies());
+
+		System.out.print  ("\nnumber of solutions    ");
+
+		final int MAX = 1000;
+		Solver solver = new Solver(g);
+
+		solver.setNodeCounting(true);
+		solver.setNodeCount(0);
+
+		int solns = solver.countSolutions(MAX + 1);
+		int nodes = solver.getNodeCount();
+
+		System.out.println(solns > MAX ? String.format(">%,d", MAX) : String.format("%,d", solns));
+		System.out.println("nodes traversed        " + String.format("%,d", nodes));
+		System.out.println("is proper              " + solver.isProper());
+		System.out.println("  - is unique          " + (solns == 1));
+		System.out.println("  - is minimal         " + solver.isMinimal());
 	}
 }

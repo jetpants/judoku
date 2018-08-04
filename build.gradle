@@ -2,7 +2,7 @@
  * user guide available at https://docs.gradle.org/4.6/userguide/java_library_plugin.html
  */
 
-version = '1.1'
+version = '1.2'
 
 buildscript {
     ext.kotlin_version = '1.2.31'

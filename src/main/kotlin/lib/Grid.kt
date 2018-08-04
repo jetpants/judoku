@@ -437,11 +437,11 @@ class Grid {
 							throw JsonParseException("Too few or too many cell values")
 
 						val cells = ByteArray(1 + size * size, {
-							/*	cells[] has an extra element at the front. Indexing is by a
-							  	1-based index. Rather than do a subtraction each  time cell
-							  	values are read, for efficiency, the index is left  unchanged
-							  	and this extra element is padded with a -1. */
-							i -> if (i == 0) -1 else array.get(i - 1).getAsInt().toByte()
+							/*	cells[] has an extra unused element at the front. Indexing is
+							  	by a 1-based index. Rather than do a subtraction each time
+							  	cell values are read, for efficiency, the index is left
+							  	unchanged. */
+							i -> (if (i == 0) EMPTY else array.get(i - 1).getAsInt()).toByte()
 						})
 
 						val g = Grid(size, boxWidth, boxHeight, cells, DeserializedType.DESERIALIZED)

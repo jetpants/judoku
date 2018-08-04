@@ -1,22 +1,18 @@
 package judoku
 
-class Generator(private val prototype: Grid) {
-    private var cached: Grid? = null
-
-    init {
-        check(prototype.isLegal())
-
-        /*  generating solutions takes time. Although it's only used here for validation,
-            don't throw away the result - we can use it later */
-        val cached = Solver.findSolution(prototype)
-        require (cached != null) { "Prototype has no solutions" }
+object Generator {
+    @JvmStatic
+    fun generate(size: Int, symmetry: Symmetry, minimal: Boolean = true): Grid {
+        val g = Grid(size)
+        return generate(g.boxWidth, g.boxHeight, symmetry, minimal)
     }
 
-    fun generate(symmetry: Symmetry, minimal_: Boolean = true): Grid {
-        var minimal = minimal_           // val to var
+    @JvmStatic
+    fun generate(boxWidth: Int, boxHeight: Int, symmetry: Symmetry, _minimal: Boolean = true): Grid {
+        var minimal = _minimal           // val to var
 
         // for these narrow boxes, no minimal solution will exist in some symmetry modes
-        if (prototype.boxWidth == 1 || prototype.boxHeight == 1)
+        if (boxWidth == 1 || boxHeight == 1)
             minimal = false
 
         /*	if the symmetry mode is NONE (asymmetric) then it's always possible to generate a
@@ -46,51 +42,45 @@ class Generator(private val prototype: Grid) {
 
         var out: Grid
 
-    do
-        out = generatePotentiallyNonMinimal(symmetry)
-    while (minimal && !Solver.isMinimal(out))
+        do
+            out = generatePotentiallyNonMinimal(boxWidth, boxHeight, symmetry)
+        while (minimal && !Solver.isMinimal(out))
 
         return out
     }
 
-    private fun generatePotentiallyNonMinimal(symmetry: Symmetry): Grid {
-        val solution = cached       // the solution that was used to validate the constructor argument
-        cached = null               // can be used one time only
-
-        var out = if (solution != null)
-            solution
-        else {
-            val s = Solver.findSolution(prototype)
-            check(s != null)
-            s!!
-        }
+    private fun generatePotentiallyNonMinimal(boxWidth: Int, boxHeight: Int,
+            symmetry: Symmetry): Grid {
+        val solution = Solver.findSolution(Grid(boxWidth, boxHeight))
+        check(solution != null)
+        var puzzle = solution!!
 
         /*	generate indices into the grid's cells and shuffle their order. The cells of the
 		  	grid will be traversed in this order looking for clues that can be removed.
 		  	Traversing them in this random order means that the generated puzzles will have
 			randomly placed spaces and aren't 'top heavy' */
 
-        val shuffled = IntArray(out.numCells, { it + 1 }).apply() { this.shuffle() }
+        val shuffled = IntArray(puzzle.numCells, { it + 1 }).apply() { this.shuffle() }
 
         /*	start out with a complete solution with all cells filled and iteratively test
 			which pairs of cells may be emptied while keeping the puzzle to only one solution */
 
         for (a in shuffled) {
             // a & b, the two candidate cells to be emptied
-            val b = symmetry.apply(out, a)
+            val b = symmetry.apply(puzzle, a)
 
             //  if a maps to b then b maps to a. Only need to process each pair once
             if (a > b) continue
 
-            val trial = out.withEmpty(a).withEmpty(b)
+            val trial = puzzle.withEmpty(a).withEmpty(b)
 
             val uniqueSolution = Solver.countSolutions(trial, 2) == 1
 
             /*	if there's still a unique solution having removed that pair of cells, proceed
 			 	with the modified grid as the base case (and try other pairs too) */
-            if (uniqueSolution) out = trial
+            if (uniqueSolution) puzzle = trial
         }
 
-        return out
+        return puzzle
     }
 }

@@ -123,8 +123,6 @@ public class jdspeed {
 		  	only the number of test grids. Increasing the number of test grids should minimise
 		  	variance in the average time. Some grids are much quicker to solve than others. */
 
-		Generator generator = new Generator(new Grid(9));
-
 		Grid[] out = new Grid[n];
 
 		String prompt = "\rGenerating test-puzzles... ";
@@ -138,7 +136,7 @@ public class jdspeed {
 				if (p != percent) System.out.print(prompt + (percent = p) + "%");
 			}
 
-			out[i] = generator.generate(Symmetry.NONE, false /*minimal*/);
+			out[i] = Generator.generate(9, Symmetry.NONE, false /*minimal*/);
 		}
 
 		System.out.println(prompt + "100%");

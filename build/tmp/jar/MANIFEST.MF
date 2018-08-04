@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Implementation-Version: 1.2
+Implementation-Title: Judoku
+Implementation-Vendor: (C) 2018 Steve Ball <jetpants@gmail.com>
+

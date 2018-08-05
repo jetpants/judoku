@@ -22,12 +22,13 @@ Or, how about this beauty?
 I wrote some articles on what I discovered about the JVM and the way its been so aggressively optimised in recent years:
 
 [Low-latency optimisation on the JVM](https://www.linkedin.com/pulse/low-latency-optimisation-jvm-steve-ball/)
+[Low-latency optimisation on the JVM—Part 2: JVM optimisations](https://www.linkedin.com/pulse/low-latency-optimisation-jvmpart-2-jvm-optimisations-steve-ball/)
 
 ## Running the command-line utilities
 
 If you're using Linux or a Mac, then in the `./bin` directory there are bash scripts that invoke the JAR in the right way:
 
-```bash
+```
 ~/Code/judoku> jdgen --size=9
 ┌─────────┬─────────┬─────────┐
 |       5 |    8    |    6  2 |
@@ -42,13 +43,11 @@ If you're using Linux or a Mac, then in the `./bin` directory there are bash scr
 | 3  5    |         |         |
 | 1  9    |    4    | 8       |
 └─────────┴─────────┴─────────┘
-
-~/Code/judoku>
 ```
 
 All commands have a `--help` option to show what the usage text:
 
-```bash
+```
 ~/Code/judoku> jdsolve --help
 Usage: jdsolve [OPTION]... JSONFILE...
 Calculate solutions for saved Sudoku grids.
@@ -58,7 +57,6 @@ Calculate solutions for saved Sudoku grids.
   --count        Show number of solutions only
   --csv=FILE     Write CSV representation of solution to FILE
   --json=FILE    Write JSON representation of solution to FILE
-~/Code/judoku> 
 ```
 
 If you're using Windows, you will need to invoke the Java run-time manually:
@@ -81,7 +79,4 @@ yield a puzzle that would no longer have a unique solution.
   --json=FILE    Write corresponding JSON representation to FILE
   --empty        Generate an empty grid of the requested size
   --seed=SEED    Seeds the random number generator with SEED.
-C:\judoku>
 ```
-
-

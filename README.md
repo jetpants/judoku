@@ -17,6 +17,71 @@ Or, how about this beauty?
 
 ![16x16](https://i.imgur.com/40Z018O.png)
 
-I wrote some articles on what I discovered. It's a series looking at the JVM, sudoku strategies, some Kotlin coding techniques:
+## Optimisation strategies
+
+I wrote some articles on what I discovered about the JVM and the way its been so aggressively optimised in recent years:
 
 [Low-latency optimisation on the JVM](https://www.linkedin.com/pulse/low-latency-optimisation-jvm-steve-ball/)
+
+## Running the command-line utilities
+
+If you're using Linux or a Mac, then in the `./bin` directory there are bash scripts that invoke the JAR in the right way:
+
+```bash
+~/Code/judoku> jdgen --size=9
+┌─────────┬─────────┬─────────┐
+|       5 |    8    |    6  2 |
+|         |         |    3  7 |
+|         |       2 | 4       |
+├─────────┼─────────┼─────────┤
+| 6       |    9  4 | 3       |
+|         | 1     7 |         |
+|       8 | 2  6    |       1 |
+├─────────┼─────────┼─────────┤
+|       6 | 9       |         |
+| 3  5    |         |         |
+| 1  9    |    4    | 8       |
+└─────────┴─────────┴─────────┘
+
+~/Code/judoku>
+```
+
+All commands have a `--help` option to show what the usage text:
+
+```bash
+~/Code/judoku> jdsolve --help
+Usage: jdsolve [OPTION]... JSONFILE...
+Calculate solutions for saved Sudoku grids.
+
+  --all          Show all solutions
+  --max=N        Show maximum of N solutions (default: 1)
+  --count        Show number of solutions only
+  --csv=FILE     Write CSV representation of solution to FILE
+  --json=FILE    Write JSON representation of solution to FILE
+~/Code/judoku> 
+```
+
+If you're using Windows, you will need to invoke the Java run-time manually:
+
+```
+C:\judoku>java -cp "%CLASSPATH%:./build/libs/Judoku-1.2.jar:./build/classes/java/main/cmdline" cmdline.jdgen --help
+Usage: jdgen [OPTION]...
+Generate a grid for a 'proper' puzzle. A proper puzzle is a grid that has only
+one solution and, additionally, where removing any one of its clues would
+yield a puzzle that would no longer have a unique solution.
+
+  --size=N       A square grid of size N
+  --box=W,H      Grid with boxes of width W and height H
+  --sym=MODE     Symmetry mode, one of the following (or unique prefix of):
+                 rotate180 (default), diagonal, horizontal, vertical, none,
+                 random
+  --fast         Quicker but puzzles may not be proper; there may be one more
+                 extra clue than strictly required to have a unique solution
+  --csv=FILE     Write corresponding CSV representation to FILE
+  --json=FILE    Write corresponding JSON representation to FILE
+  --empty        Generate an empty grid of the requested size
+  --seed=SEED    Seeds the random number generator with SEED.
+C:\judoku>
+```
+
+

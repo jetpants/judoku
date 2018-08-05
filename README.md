@@ -19,7 +19,7 @@ Or, how about this beauty?
 
 ## Optimisation strategies
 
-I wrote some articles on what I discovered about the JVM and the way its been so aggressively optimised in recent years:
+The JVM sets the gold standard for virtual machine efficiency and that's been the result of sustained aggresive optimisation over a quarter of a century! Particularly in the last ten years, the JVM has become absolutely brutal in its speed. It's even fast than C/C++ for heap allocation now. This opened up the JVM to the world of low-latency and real-time development and I wrote some articles about the specifics of what I discovered:
 
 - [Low-latency optimisation on the JVM](https://www.linkedin.com/pulse/low-latency-optimisation-jvm-steve-ball/)
 - [Low-latency optimisation on the JVM—Part 2: JVM optimisations](https://www.linkedin.com/pulse/low-latency-optimisation-jvmpart-2-jvm-optimisations-steve-ball/)

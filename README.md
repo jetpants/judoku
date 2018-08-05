@@ -62,7 +62,7 @@ Calculate solutions for saved Sudoku grids.
 If you're using Windows, you will need to invoke the Java run-time manually:
 
 ```
-C:\judoku>java -cp "%CLASSPATH%:./build/libs/Judoku-1.2.jar:./build/classes/java/main/cmdline" cmdline.jdgen --help
+C:\judoku>java -cp "%CLASSPATH%:.\build\libs\Judoku-1.2.jar:.\build\classes\java\main\cmdline" cmdline.jdgen --help
 Usage: jdgen [OPTION]...
 Generate a grid for a 'proper' puzzle. A proper puzzle is a grid that has only
 one solution and, additionally, where removing any one of its clues would

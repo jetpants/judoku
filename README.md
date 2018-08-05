@@ -29,7 +29,7 @@ I wrote some articles on what I discovered about the JVM and the way its been so
 If you're using Linux or a Mac, then in the `./bin` directory there are bash scripts that invoke the JAR in the right way:
 
 ```
-~/Code/judoku> jdgen --size=9
+~/Code/judoku> ./bin/jdgen --size=9
 ┌─────────┬─────────┬─────────┐
 |       5 |    8    |    6  2 |
 |         |         |    3  7 |
@@ -48,7 +48,7 @@ If you're using Linux or a Mac, then in the `./bin` directory there are bash scr
 All commands have a `--help` option to show what the usage text:
 
 ```
-~/Code/judoku> jdsolve --help
+~/Code/judoku> ./bin/jdsolve --help
 Usage: jdsolve [OPTION]... JSONFILE...
 Calculate solutions for saved Sudoku grids.
 

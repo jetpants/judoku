@@ -21,8 +21,8 @@ Or, how about this beauty?
 
 I wrote some articles on what I discovered about the JVM and the way its been so aggressively optimised in recent years:
 
-[Low-latency optimisation on the JVM](https://www.linkedin.com/pulse/low-latency-optimisation-jvm-steve-ball/)
-[Low-latency optimisation on the JVM—Part 2: JVM optimisations](https://www.linkedin.com/pulse/low-latency-optimisation-jvmpart-2-jvm-optimisations-steve-ball/)
+- [Low-latency optimisation on the JVM](https://www.linkedin.com/pulse/low-latency-optimisation-jvm-steve-ball/)
+- [Low-latency optimisation on the JVM—Part 2: JVM optimisations](https://www.linkedin.com/pulse/low-latency-optimisation-jvmpart-2-jvm-optimisations-steve-ball/)
 
 ## Running the command-line utilities
 

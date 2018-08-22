@@ -3,7 +3,7 @@
 
 A highly-optimised puzzle generator and solver. On my 5-year old Macbook Air, average time to solve a puzzle is 88 µs.
 
-This started out as a project to test some ideas around JVM optimisations for low-latency banking applications, but turned into a chance to explore what's been happening internally inside the JVM with its evolution and re-think my optimisation strategies. The JVM, for example, has very much been optimised for immutable objects and ultra-fast heap allocation.
+This started out as a project to test some ideas around JVM optimisations for low-latency banking applications, but turned into a chance to explore what's been happening internally inside the JVM with its evolution and re-think my optimisation strategies. It's easy to see with the latest versions of the JVM that it's very much been optimised for immutable objects and ultra-fast heap allocation now. It's blindingly fast.
 
 Time to brute-force recursively solve puzzles started out at 21 ms. Applying different optimisation strategies, some with scale factors of improvement reduced this ultimately by 99.6%.
 
@@ -19,7 +19,7 @@ Or, how about this beauty?
 
 ## Optimisation strategies
 
-The JVM sets the gold standard for virtual machine efficiency and that's been the result of sustained aggressive optimisation over a quarter of a century. Particularly in the last ten years, the JVM has brutalised the VM competition. Even in the native space it can beat out C/C++ for heap allocation. This opened up the JVM to the world of low-latency and real-time development and I wrote some articles about the specifics of what I discovered:
+The JVM sets the gold standard for virtual machine efficiency and that's been the result of sustained aggressive optimisation over a quarter of a century. Particularly in the last ten years, the JVM has brutalised the VM competition. Even in the native space it can beat C/C++ for heap allocation. This opened up the JVM to the world of low-latency and real-time development and I wrote some articles about the specifics of what I discovered:
 
 - [Low-latency optimisation on the JVM](https://www.linkedin.com/pulse/low-latency-optimisation-jvm-steve-ball/)
 - [Low-latency optimisation on the JVM—Part 2: JVM optimisations](https://www.linkedin.com/pulse/low-latency-optimisation-jvmpart-2-jvm-optimisations-steve-ball/)
@@ -27,9 +27,8 @@ The JVM sets the gold standard for virtual machine efficiency and that's been th
 ## Running the command-line utilities
 
 If you're using Linux or a Mac, then in the `./bin` directory there are bash scripts that invoke the JAR in the right way:
-
 ```
-~/Code/judoku> ./bin/jdgen --size=9
+~/Code/judoku> ./bin/judoku -c -n9
 ┌─────────┬─────────┬─────────┐
 |       5 |    8    |    6  2 |
 |         |         |    3  7 |
@@ -43,40 +42,71 @@ If you're using Linux or a Mac, then in the `./bin` directory there are bash scr
 | 3  5    |         |         |
 | 1  9    |    4    | 8       |
 └─────────┴─────────┴─────────┘
+
+~/Code/judoku> ./bin/judoku -c -b 5x2
+┌───────────────┬───────────────┐
+|       D       |               |
+| E  F     H    |    I  J       |
+├───────────────┼───────────────┤
+|          B    |    D  A  J    |
+|          A    | E        F  G |
+├───────────────┼───────────────┤
+|       B     C |          A    |
+|    G          | H     I       |
+├───────────────┼───────────────┤
+| G  I        B |    C          |
+|    A  C  E    |    G          |
+├───────────────┼───────────────┤
+|       H  F    |    J     I  E |
+|               |       H       |
+└───────────────┴───────────────┘
 ```
-
-All commands have a `--help` option to show what the usage text:
-
+There are a lot of options for creating, solving, saving and viewing stored grids. Use the `-h` help option to see them all:
 ```
-~/Code/judoku> ./bin/jdsolve --help
-Usage: jdsolve [OPTION]... JSONFILE...
-Calculate solutions for saved Sudoku grids.
+~/Code/judoku> ./bin/judoku -h
+judoku -crspV [OPTION...] [FILE]
 
-  --all          Show all solutions
-  --max=N        Show maximum of N solutions (default: 1)
-  --count        Show number of solutions only
-  --csv=FILE     Write CSV representation of solution to FILE
-  --json=FILE    Write JSON representation of solution to FILE
+First option must be a mode specifier:
+  -c Create  -r Read  -s Solve  -p Performance  -V version
+
+Common options:
+  -j JSONFILE    Write resulting grid to JSON file
+  -S SEED        Seed the random number generator with the number SEED
+  -v             Verbose
+  -x CSVFILE     Export resulting grid to CSV file
+
+judoku -c[bejnqSvxy]
+  Create a puzzle with one unique solution and the minimum number of clues
+  -b WxH         Puzzle with boxes of width W and height H (default is 3x3)
+  -e             Create an empty grid
+  -n N           Size of puzzle is N x N (default is 9)
+  -q             Much quicker but possibly with one extra unneeded clue
+  -y MODE        Symmetry mode: rotational (default), diagonal, horizontal,
+                 vertical, none (abbreviations ok)
+
+judoku -r[vx] FILE
+  Read the JSON grid file and render it as text. Use verbose to see statistics.
+
+judoku -s[aCjmSx] FILE
+  Solve a puzzle
+  -a             Show all solutions
+  -C             Count solutions instead of showing them
+  -m MAX         Show/count up to a maximum of MAX solutions (def. 1)
+
+judoku -p[iSv] [FILE]
+  -i N           Run a performance test of N iterations (default 10,000)
+  FILE           Test FILE rather than default of randomly-generated puzzles
+
+Examples:
+  judoku -c -n4 -j tiny.json          # create tiny.json with a 4x4 puzzle
+  judoku -r bee.json                  # show contents of bee.json
+  judoku -rx bee.csv bee.json         # export JSON to CSV
+  judoku -s hard.json                 # find a solution to the puzzle
+  judoku -sC -m1000 4x4-empty.json    # count the solutions up to a max of 1000
+  judoku -p                           # run standard performance test
 ```
 
 If you're using Windows, you will need to invoke the Java run-time manually:
-
 ```
-C:\judoku>java -cp "%CLASSPATH%:.\build\libs\Judoku-1.2.jar:.\build\classes\java\main\cmdline" cmdline.jdgen --help
-Usage: jdgen [OPTION]...
-Generate a grid for a 'proper' puzzle. A proper puzzle is a grid that has only
-one solution and, additionally, where removing any one of its clues would
-yield a puzzle that would no longer have a unique solution.
-
-  --size=N       A square grid of size N
-  --box=W,H      Grid with boxes of width W and height H
-  --sym=MODE     Symmetry mode, one of the following (or unique prefix of):
-                 rotate180 (default), diagonal, horizontal, vertical, none,
-                 random
-  --fast         Quicker but puzzles may not be proper; there may be one more
-                 extra clue than strictly required to have a unique solution
-  --csv=FILE     Write corresponding CSV representation to FILE
-  --json=FILE    Write corresponding JSON representation to FILE
-  --empty        Generate an empty grid of the requested size
-  --seed=SEED    Seeds the random number generator with SEED.
+C:\judoku>java -cp "%CLASSPATH%:.\build\libs\judoku-2.0.jar" cmd.JudokuKt -c
 ```

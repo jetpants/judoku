@@ -30,12 +30,12 @@ class GridTest {
         assertEquals(7, g.toTopRowFromBand(3));
         assertEquals(9, g.toBottomRowFromBand(3));
 
-        assertEquals(81, g.numEmptyCells());
-        assertEquals(0, g.numFilledCells());
+        assertEquals(81, g.getNumEmptyCells());
+        assertEquals(0, g.getNumFilledCells());
 
         g = g.withCell(5, 5, 1);
-        assertEquals(80, g.numEmptyCells());
-        assertEquals(1, g.numFilledCells());
+        assertEquals(80, g.getNumEmptyCells());
+        assertEquals(1, g.getNumFilledCells());
     }
 
 

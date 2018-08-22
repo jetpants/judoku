@@ -12,8 +12,7 @@ object Generator {
         var minimal = _minimal           // val to var
 
         // for these narrow boxes, no minimal solution will exist in some symmetry modes
-        if (boxWidth == 1 || boxHeight == 1)
-            minimal = false
+        if (boxWidth == 1 || boxHeight == 1) minimal = false
 
         /*	if the symmetry mode is NONE (asymmetric) then it's always possible to generate a
           	proper puzzle the first time and to do so quickly: you start with an empty grid,
@@ -39,6 +38,8 @@ object Generator {
 			In some combinations of the initially randomly generated solution and the particular
 			symmetry mode, there may not exist any proper puzzle. In that case, generate another
 			solution and try again. */
+
+        if (symmetry == Symmetry.NONE) minimal = false
 
         var out: Grid
 

@@ -4,3 +4,4 @@
 - change Integer.SIZE to Int.SIZE_BITS (when Kotlin 1.3 is released)
 - GSON should be lazyint instead of un thread safe nullable
 - "RANDOM" should be processed outside of the Symmetry class
+- make jar a fat jar so gson doesn't need to be in the CP

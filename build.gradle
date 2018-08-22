@@ -2,10 +2,10 @@
  * user guide available at https://docs.gradle.org/4.6/userguide/java_library_plugin.html
  */
 
-version = '1.2'
+version = '2.0'
 
 buildscript {
-    ext.kotlin_version = '1.2.31'
+    ext.kotlin_version = '1.2.51'
 
     repositories {
         mavenCentral()
@@ -32,15 +32,12 @@ compileKotlin {
 }
 
 dependencies {
-    // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation 'com.google.code.gson:gson:2.7'
-
-    // Use JUnit test framework
-    //testImplementation 'junit:junit:4.12'
-
     compile "org.jetbrains.kotlin:kotlin-runtime"
-    //compile "org.jetbrains.kotlin:kotlin-stdlib"
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compile "org.jetbrains.kotlin:kotlin-stdlib"
+    //compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compile 'commons-cli:commons-cli:1.4'
+    compile 'com.google.code.gson:gson:2.7'
+
     testCompile "org.jetbrains.kotlin:kotlin-test"
     testCompile "org.jetbrains.kotlin:kotlin-test-junit"
 
@@ -63,19 +60,18 @@ allprojects {
 }
 
 jar {
-    // exclude cmdline utilities -- only include library classes of judoku package
-    exclude('*.class')
-
     manifest {
-        attributes 'Implementation-Version': project.version,
-            'Implementation-Title': project.name,
-            'Implementation-Vendor': '(C) 2018 Steve Ball <jetpants@gmail.com>'
+        attributes 'Implementation-Title': project.name,
+            'Implementation-Version': project.version,
+            'Implementation-Vendor': 'Copyright 2018 Steve Ball <jetpants@gmail.com>',
+            'Main-Class': 'cmd.JudokuKt'
     }
 
     from {
         String[] include = [
             "kotlin-runtime-${kotlin_version}.jar",
-            "kotlin-stdlib-${kotlin_version}.jar"
+            "kotlin-stdlib-${kotlin_version}.jar",
+	    "gson-2.2.2.jar"
         ]
 
         configurations.compile

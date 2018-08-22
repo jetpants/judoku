@@ -11,7 +11,7 @@ import com.google.gson.*
 	http://sudopedia.enjoysudoku.com/Terminology.html */
 
 class Grid {
-	constructor() : this(9)				// default is standard 9 x 9
+	constructor() : this(DEFAULT_SIZE)		// default is standard 9 x 9
 
 	constructor(size: Int) {
 		// Int bit-masks are used to allow rapid calculation of cell options. This number
@@ -68,6 +68,8 @@ class Grid {
 	val numCells get() = size * size
 	val numStacks get() = boxHeight			// width of grid in boxes
 	val numBands get() = boxWidth			// height of grid in boxes
+	val numEmptyCells get() = numCells - numFilledCells
+	val numFilledCells get() = cells.count { it != EMPTY.toByte() }
 
 	internal val MEGA_MASK: Int		// calculated at construction for efficiency
 	// can't be called until after size has been initialised
@@ -89,9 +91,6 @@ class Grid {
     fun toBandFromBox(box: Int) = (box - 1) / numStacks + 1
     fun toStackFromBox(box: Int) = (box - 1) % numStacks + 1
     fun toBoxFromStackBand(stack: Int, band: Int) = (band - 1) * numStacks + stack
-
-	fun numEmptyCells() = numCells - numFilledCells()
-	fun numFilledCells() = cells.count { it != EMPTY.toByte() }
 
 	fun getCell(n: Int) = cells[n].toInt()
 	fun getCell(col: Int, row: Int): Int {
@@ -392,6 +391,7 @@ class Grid {
 
 	companion object {
 		const val EMPTY = 0
+		const val DEFAULT_SIZE = 9
 
 		@JvmStatic
 		@Throws(JsonParseException::class)

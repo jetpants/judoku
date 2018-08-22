@@ -9,13 +9,15 @@ class Solver(private val puzzle: Grid) {
     }
 
     fun findSolutions(max: Int): ArrayList<Grid> {
-        val solutions = ArrayList<Grid>(max)
-        val n = search(puzzle, solutions, max, puzzle.numFilledCells() == 0)
+        val solutions = ArrayList<Grid>()
+        val n = search(puzzle, solutions, max, puzzle.numFilledCells == 0)
         check(n == solutions.size) { "$n <> ${solutions.size}" }
         return solutions
     }
 
-    fun countSolutions(max: Int): Int = search(puzzle, null, max, false)
+    fun countSolutions() = countSolutions(Int.MAX_VALUE)
+    fun countSolutions(max: Int) = search(puzzle, null, max, false)
+    fun hasSolution() = countSolutions(1) == 1
 
     fun isUnique() = countSolutions(2) == 1      // exactly one solution
 
@@ -30,9 +32,10 @@ class Solver(private val puzzle: Grid) {
     }
 
     fun isProper(): Boolean {
-        /*  A so-called 'proper' puzzle has exactly one unique solution and no given is
-            superfluous. I.e., removing any one of the givens would result in a puzzle with more
-            than one solution. Proper puzzles are both sufficent and minimal. */
+        /*  A so-called 'proper' puzzle has exactly one unique solution and no
+            clue is superfluous. I.e., removing any one of the clues would result
+            in a puzzle with more than one solution. Proper puzzles are both
+            sufficent and minimal. */
         return isUnique() && isMinimal()
     }
 

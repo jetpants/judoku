@@ -26,7 +26,7 @@ The JVM sets the gold standard for virtual machine efficiency and that's been th
 
 ## Running the command-line utilities
 
-If you're using Linux or a Mac, then in the `./bin` directory there are bash scripts that invoke the JAR in the right way:
+If you're using Linux or a Mac, then in the `./bin` directory there's a bash script that invokes the JAR in the right way (and a matching powershell script for Windows):
 ```
 ~/Code/judoku> ./bin/judoku -c -n9
 ┌─────────┬─────────┬─────────┐
@@ -104,9 +104,4 @@ Examples:
   judoku -s hard.json                 # find a solution to the puzzle
   judoku -sC -m1000 4x4-empty.json    # count the solutions up to a max of 1000
   judoku -p                           # run standard performance test
-```
-
-If you're using Windows, you will need to invoke the Java run-time manually:
-```
-C:\judoku>java -cp "$CLASSPATH;.\build\libs\judoku-2.0.jar" cmd.JudokuKt -c
 ```

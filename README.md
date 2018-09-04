@@ -108,5 +108,5 @@ Examples:
 
 If you're using Windows, you will need to invoke the Java run-time manually:
 ```
-C:\judoku>java -cp "%CLASSPATH%:.\build\libs\judoku-2.0.jar" cmd.JudokuKt -c
+C:\judoku>java -cp "$CLASSPATH;.\build\libs\judoku-2.0.jar" cmd.JudokuKt -c
 ```

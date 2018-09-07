@@ -105,3 +105,20 @@ Examples:
   judoku -sC -m1000 4x4-empty.json    # count the solutions up to a max of 1000
   judoku -p                           # run standard performance test
 ```
+
+## Building and installing
+
+To build the project, you will need to download two libraries:
+
++ gson-2.2.2.jar https://search.maven.org/artifact/com.google.code.gson/gson/2.2.2/jar
++ commons-cli-1.4.jar https://search.maven.org/artifact/commons-cli/commons-cli/1.4/jar
+
+The project is built using Gradle and has build scripts for Linux/MacOS and Windows.
+
+I recommend downloading the libraries manually and installing them under some local libraries directory. As a Mac user, I placed them under `/Library/Java` and then placed the libraries in my classpath (which I set in my `~/.bashrc`):
+
+```
+export CLASSPATH=.
+CLASSPATH=$CLASSPATH:/Library/Java/gson-2.2.2/gson-2.2.2.jar
+CLASSPATH=$CLASSPATH:/Library/Java/commons-cli-1.4/commons-cli-1.4.jar
+```

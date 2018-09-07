@@ -10,8 +10,9 @@ Time to brute-force recursively solve puzzles started out at 21 ms. Applying dif
 Anyhow, this library produces beautiful sudoku grids and solves given puzzles fast. It supports arbitrary sizes,
 like 4x4 or 16x16, in addition to the normal 9x9. The sub-boxes don't even need to be square; you can have a 6x6 made up of 3x2 boxes if you like:
 
-![4x4](https://i.imgur.com/l2uHIKX.png)
+![9x9](https://imgur.com/wSpzK9G.png)
 ![6x6](https://i.imgur.com/zIxxBzf.png)
+![4x4](https://i.imgur.com/l2uHIKX.png)
 
 Or, how about this beauty?
 

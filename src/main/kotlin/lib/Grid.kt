@@ -164,9 +164,9 @@ class Grid {
 
 		var mask = 0x0
 
-		for (i in 1..size) {
-			if (i != row) mask = mask or (1 shl getCell(toNth(col, i)))
-			if (i != col) mask = mask or (1 shl getCell(toNth(i, row)))
+		for (n in 1..size) {
+			if (n != row) mask = mask or (1 shl getCell(toNth(col, n)))
+			if (n != col) mask = mask or (1 shl getCell(toNth(n, row)))
 		}
 
 		val stack = toStackFromColumn(col)
@@ -253,8 +253,8 @@ class Grid {
 		 	there's a cell for whom all values have been eliminated as possibilities by the
 			other values in its column, row or box. */
 
-		for (i in 1..numCells)
-			if (getOptions(i).size == 0)
+		for (n in 1..numCells)
+			if (getOptions(n).size == 0)
 				return true;
 
 		return false

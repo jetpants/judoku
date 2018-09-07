@@ -3,11 +3,7 @@ package cmd;
 import kotlin.system.exitProcess
 import java.io.*
 import java.util.Random
-import judoku.Generator
-import judoku.Grid
-import judoku.Solver
-import judoku.Symmetry
-import judoku.Util
+import judoku.*
 import org.apache.commons.cli.*
 
 fun main(args: Array<String>) {
@@ -19,7 +15,7 @@ fun main(args: Array<String>) {
             grid.toJson(writer)
             writer.close()
         } catch (e: IOException) {
-            syserrln("judoku: unable to write to file: ${e.message}")
+            syserrln("judoku: Unable to write to file: ${e.message}")
             exitProcess(1)
         }
 
@@ -29,7 +25,7 @@ fun main(args: Array<String>) {
             grid.toCsv(writer)
             writer.close()
         } catch (e: IOException) {
-            syserrln("judoku: unable to write to file: ${e.message}")
+            syserrln("judoku: Unable to write to file: ${e.message}")
             exitProcess(1)
         }
 }
@@ -200,7 +196,7 @@ private fun create(cmdline: CommandLine): Grid {
     }
 
     if (size != null && boxWidth != null && boxHeight != null && size != boxWidth * boxHeight) {
-        syserrln("judoku: conflicting dimensions: ${size} vs ${boxWidth}x${boxHeight}")
+        syserrln("judoku: Conflicting dimensions: ${size} vs ${boxWidth}x${boxHeight}")
         exitProcess(1)
     }
 
@@ -219,13 +215,12 @@ private fun create(cmdline: CommandLine): Grid {
     }
 
     println(grid)
-
     return grid
 }
 
 private fun read(file: String): Grid {
     var grid = readGrid(file)
-    println(grid.toString())
+    println(grid)
     if (verbose) statistics(grid)
     return grid
 }
@@ -434,7 +429,7 @@ private fun help() {
     judoku -crspV [OPTION...] [FILE]
 
     First option must be a mode specifier:
-      -c Create  -r Read  -s Solve  -p Performance  -V version
+      -c Create  -r Read  -s Solve  -p Performance  -V Version
 
     Common options:
       -j JSONFILE    Write resulting grid to JSON file
@@ -481,7 +476,7 @@ private fun syserrln(message: String) { System.err.println(message) }
 
 private val TEST_SIZE = 10000		// default number of iterations in perf-test
 /*  this number has been tuned such that the performance test spends about as much time
-    generating puzzles as solving them */
+    generating puzzles as it does solving them */
 private val TESTS_PER_GRID = 65
 
 // common command-line options

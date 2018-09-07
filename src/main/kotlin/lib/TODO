@@ -1,7 +1,4 @@
-- Switch to Apache license
-- amalgamate jd* progs into judoku [-solve | -gen | -view ]
-- better way to generate is do it as a solve(), keeping track of the path on the way to the leaf and then unrolling it
 - change Integer.SIZE to Int.SIZE_BITS (when Kotlin 1.3 is released)
 - GSON should be lazyint instead of un thread safe nullable
-- "RANDOM" should be processed outside of the Symmetry class
 - make jar a fat jar so gson doesn't need to be in the CP
+- switched to +----+----+----+ instead of line drawing if it's not an ANSI terminal

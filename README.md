@@ -1,5 +1,5 @@
 # Judoku
-## the judo of sudoku
+## The judo of sudoku
 
 A highly-optimised puzzle generator and solver. On my 5-year old Macbook Air, average time to solve a puzzle is 88 µs.
 

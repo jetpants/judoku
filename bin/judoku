@@ -2,6 +2,6 @@
 
 ROOTDIR="`dirname "$0"`/.."
 LIBDIR="$ROOTDIR/build/libs"
-JUDOJAR="$LIBDIR/`cd "$LIBDIR"; ls judoku-*.jar | tail -n 1`"
+JUDOJAR="$LIBDIR/`cd "$LIBDIR"; ls judoku-large-bmi-*.jar | tail -n 1`"
 
 java -cp "$JUDOJAR:$CLASSPATH" cmd.JudokuKt "$@"

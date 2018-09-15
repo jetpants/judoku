@@ -77,7 +77,4 @@ object Util {
     const val ANSI_NORMAL = "\u001b[0m"
     const val ANSI_BOLD   = "\u001b[1m"
     const val ANSI_FAINT  = "\u001b[2m"
-
-    const val ANSI_LINE_DRAWING_ON  = "\u000e"
-    const val ANSI_LINE_DRAWING_OFF = "\u000f"
 }

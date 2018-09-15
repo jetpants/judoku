@@ -347,14 +347,14 @@ private fun generateTestGrids(n: Int): Array<Grid> {
     if (verbose) print(prompt)
     var percent = -1;
 
-    val out = Array<Grid>(n, {
+    val out = Array<Grid>(n) {
         if (verbose) {
             val p = Math.round(100.0 * it / n).toInt()
             if (p != percent) { percent = p; print("$prompt $p%") }
         }
 
         Generator.generate(9, Symmetry.NONE, true)
-    })
+    }
 
     if (verbose) println("$prompt 100%")
 

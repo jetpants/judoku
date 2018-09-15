@@ -2,11 +2,9 @@ package judoku
 
 import java.io.IOException
 import java.io.Reader
-import java.lang.reflect.Type
-import com.google.gson.annotations.Expose
-import com.google.gson.*
+import com.google.gson.JsonParseException
 
-/*	glossaries of Sudoku terms and jargon here:
+/*	NOTE - glossaries of Sudoku terms and jargon here:
 	http://en.wikipedia.org/wiki/List_of_Sudoku_terms_and_jargon
 	http://sudopedia.enjoysudoku.com/Terminology.html */
 
@@ -104,16 +102,19 @@ class Grid {
 	fun isFilled(col: Int, row: Int) = !isEmpty(col, row)
 
 	fun withCell(n: Int, value: Int): Grid {
+		require(n in 1..numCells)
 		require(value == EMPTY || (value in 1..size)) { "Value out of range 1-$size: $value" }
-		val new = Grid(this)
-		new._setCell(n, value)
-		return new
+		return _withCell(n, value)
 	}
 
 	fun withCell(col: Int, row: Int, value: Int): Grid {
 		requireInBounds(col, row)
-		return withCell(toNth(col, row), value)
+		require(value == EMPTY || (value in 1..size)) { "Value out of range 1-$size: $value" }
+		return _withCell(toNth(col, row), value)
 	}
+
+	fun withEmpty(n: Int) = withCell(n, EMPTY)
+	fun withEmpty(col: Int, row: Int) = withCell(col, row, EMPTY)
 
 	// internal use only - no bounds checking
 	internal fun _setCell(n: Int, value: Int) { cells[n] = value.toByte() }
@@ -123,15 +124,12 @@ class Grid {
 		return new
 	}
 
-	fun withEmpty(n: Int) = withCell(n, EMPTY)
-	fun withEmpty(col: Int, row: Int) = withCell(col, row, EMPTY)
-
 	private fun requireInBounds(col: Int, row: Int) {
 		require(col in 1..numColumns) { "Column out of range 1-${numColumns}: $col" }
 		require(row in 1..numRows) { "Row out of range 1-${numRows}: $row" }
 	}
 
-	fun getOptions(n: Int) = getOptions(toColumn(n), toRow(n))
+	fun getOptions(n: Int) = _getOptions(toColumn(n), toRow(n))
 
 	fun getOptions(col: Int, row: Int): IntArray {
 		requireInBounds(col, row)
@@ -276,110 +274,19 @@ class Grid {
 		return true
 	}
 
-	fun toCsv(): String {
-		val buf = StringBuffer()
-		try { toCsv(buf) } catch (e: Exception) {}
-		return buf.toString()
-	}
+	override fun toString(): String = GridSerializer.toString(this, null)
+	fun toString(highlightNthCell: Int): String = GridSerializer.toString(this, highlightNthCell)
 
 	@Throws(IOException::class)
-	fun toCsv(dest: Appendable) {
-		for (row in 1..numRows) {
-			for (col in 1..numColumns) {
-				if (col > 1) dest.append(',')
-				val cell = getCell(col, row)
-				if (cell != EMPTY)
-					if (size > 9 && size <= 26)
-						dest.append(('A'.toInt() - 1 + cell).toChar())
-					else
-						dest.append(Integer.toString(cell))
-			}
-			dest.append('\n')
-		}
-	}
-
-	@JvmOverloads
-	fun toString(highlightNthCell: Int? = null): String {
-		val result = StringBuffer()
-		var col = 1
-		var row = 1
-
-		val boxesOn = if (Util.isAnsiTerminal()) Util.ANSI_LINE_DRAWING_ON else ""
-		val boxesOff = if (Util.isAnsiTerminal()) Util.ANSI_LINE_DRAWING_OFF else ""
-		val faint = if (Util.isAnsiTerminal()) Util.ANSI_FAINT else ""
-		val reset = if (Util.isAnsiTerminal()) Util.ANSI_NORMAL else ""
-		result.append(boxesOn)
-
-		for (y in 0..numBands * (boxHeight + 1)) {
-			for (x in 0..numStacks * (boxWidth + 1)) {
-				var s: String
-
-				if (y == 0) {										// first horizontal line
-					if (x == 0)
-						s = faint + "┌"
-					else if (x == numStacks * (boxWidth + 1))
-						s = "┐" + reset
-					else if (x % (boxWidth + 1) == 0)
-						s = "┬"
-					else
-						s = "───"
-				} else if (y == numBands * (boxHeight + 1)) {		// last horizontal line
-					if (x == 0)
-						s = faint + "└"
-					else if (x == numStacks * (boxWidth + 1))
-						s = "┘" + reset
-					else if (x % (boxWidth + 1) == 0)
-						s = "┴"
-					else
-						s = "───"
-				} else if (y % (boxHeight + 1) == 0) {				// middle horizontal line
-					if (x == 0)
-						s = faint + "├"
-					else if (x == numStacks * (boxWidth + 1))
-						s = "┤" + reset
-					else if (x % (boxWidth + 1) == 0)
-						s = "┼"
-					else
-						s = "───"
-				} else if (x % (boxWidth + 1) == 0)
-					s = faint + "|" + reset
-				else {
-					check(row <= numRows)
-					check(col <= numColumns)
-
-					val cell = getCell(col, row)
-					s = when {
-						cell == EMPTY -> " "
-						size > 9 && size <= 26 -> (('A'.toInt() - 1 + cell).toChar()).toString()
-						else -> Integer.toString(cell)
-					}
-
-					var left = " "
-					var right = " "
-					if (toNth(col, row) == highlightNthCell) { left = "["; right = "]" }
-					if (s.length < 3) s = s + right
-					if (s.length < 3) s = left + s
-
-					if (++col > numColumns) { col = 1; ++row }
-				}
-
-				result.append(s)
-			}
-
-			result.append('\n')
-		}
-
-		result.append(boxesOff)
-
-		return result.toString()
-	}
+	fun toCsv(dest: Appendable) = GridSerializer.toCsv(this, dest)
+	fun toCsv(): String = GridSerializer.toCsv(this)
 
 	@Throws(IOException::class)
-	fun toJson(dest: Appendable): Unit = gsonInstance.toJson(this, dest)
-	fun toJson(): String = gsonInstance.toJson(this)
+	fun toJson(dest: Appendable): Unit = GridSerializer.toJson(this, dest)
+	fun toJson(): String = GridSerializer.toJson(this)
 
-	private enum class DeserializedType { DESERIALIZED }
-	private constructor(size: Int, boxWidth: Int, boxHeight: Int, cells: ByteArray,
+	internal enum class DeserializedType { DESERIALIZED }
+	internal constructor(size: Int, boxWidth: Int, boxHeight: Int, cells: ByteArray,
 			type: DeserializedType) {
 		check(type == DeserializedType.DESERIALIZED)
 		this.size = size
@@ -395,70 +302,6 @@ class Grid {
 
 		@JvmStatic
 		@Throws(JsonParseException::class)
-		fun newFromJson(from: Reader): Grid = gsonInstance.fromJson(from, Grid::class.java)
-
-		private var _gson: Gson? = null					// lazy init
-		private val gsonInstance: Gson
-			get() {
-				// !! is because compiler warns that _gson may have been set to null by
-				// another thread in between testing it and returning it
-				if (_gson != null) return _gson!!
-
-				val serializer = object : JsonSerializer<Grid> {
-					override fun serialize(g: Grid, typeOfT: Type,
-							context: JsonSerializationContext): JsonObject {
-						val obj = JsonObject()
-						obj.addProperty("size", g.size)
-						obj.addProperty("boxWidth", g.boxWidth)
-						obj.addProperty("boxHeight", g.boxHeight)
-
-						val cells = JsonArray()
-						for (n in 1..g.numCells) cells.add(JsonPrimitive(g.cells[n]))
-				        obj.add("cells", cells)
-
-						return obj;
-					}
-				}
-
-				val deserializer = object : JsonDeserializer<Grid> {
-					@Throws(JsonParseException::class)
-					override fun deserialize(json: JsonElement, typeOfT: Type,
-							context: JsonDeserializationContext): Grid {
-						val jsonObject = json.getAsJsonObject()
-
-						val size = jsonObject.get("size").getAsInt()
-						val boxWidth = jsonObject.get("boxWidth").getAsInt()
-						val boxHeight = jsonObject.get("boxHeight").getAsInt()
-						if (size != boxWidth * boxHeight)
-							throw JsonParseException("Mismatching grid size and box size")
-
-						val array = jsonObject.get("cells").getAsJsonArray()
-						if (array.size() != size * size)
-							throw JsonParseException("Too few or too many cell values")
-
-						val cells = ByteArray(1 + size * size, {
-							/*	cells[] has an extra unused element at the front. Indexing is
-							  	by a 1-based index. Rather than do a subtraction each time
-							  	cell values are read, for efficiency, the index is left
-							  	unchanged. */
-							i -> (if (i == 0) EMPTY else array.get(i - 1).getAsInt()).toByte()
-						})
-
-						val g = Grid(size, boxWidth, boxHeight, cells, DeserializedType.DESERIALIZED)
-						if (!g.isLegal()) throw JsonParseException("Illegal cell values")
-
-						return g
-					}
-				}
-
-				_gson = GsonBuilder()
-					.registerTypeAdapter(Grid::class.java, serializer)
-					.registerTypeAdapter(Grid::class.java, deserializer)
-					.setPrettyPrinting()
-					.create()
-
-				check(_gson != null) { "GsonBuilder.create() returned null" }
-				return _gson!!
-			}
+		fun newFromJson(from: Reader): Grid = GridSerializer.newFromJson(from)
 	}
 }

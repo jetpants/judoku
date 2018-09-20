@@ -109,17 +109,9 @@ Examples:
 
 ## Building and installing
 
-To build the project, you will need to download two libraries:
+To build the project, run `gradle clean build` followed by running one of the scripts in the bin directory.
 
-+ gson-2.2.2.jar https://search.maven.org/artifact/com.google.code.gson/gson/2.2.2/jar
-+ commons-cli-1.4.jar https://search.maven.org/artifact/commons-cli/commons-cli/1.4/jar
+* Linux/Mac: `./bin/judoku`
+* Windows: `bin\judoku.bat`
 
-The project is built using Gradle and has build scripts for Linux/MacOS and Windows.
 
-I recommend downloading the libraries manually and installing them under some local libraries directory. As a Mac user, I placed them under `/Library/Java` and then placed the libraries in my classpath (which I set in my `~/.bashrc`):
-
-```
-export CLASSPATH=.
-CLASSPATH=$CLASSPATH:/Library/Java/gson-2.2.2/gson-2.2.2.jar
-CLASSPATH=$CLASSPATH:/Library/Java/commons-cli-1.4/commons-cli-1.4.jar
-```
